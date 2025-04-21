@@ -1,0 +1,230 @@
+{
+  "areas": {
+    "area_16": {
+      "id": "16",
+      "tipo": "alberca_pergola",
+      "descripcion": "Alberca y Pérgola",
+      "coords": [
+        655,
+        220,
+        979,
+        430
+      ]
+    },
+    "area_parque_central": {
+      "id": "17",
+      "tipo": "area_verde",
+      "descripcion": "Parque Central",
+      "coords": [
+        273,
+        465,
+        979,
+        606
+      ]
+    }
+  },
+  "condominios": {
+    "eucalipto_1": {
+      "id": "COND. EUCALIPTO 1",
+      "descripcion": "Condominio Eucalipto 1",
+      "casas": 34,
+      "coords": [
+        806,
+        665,
+        1451,
+        851
+      ],
+      "orientacion": "Horizontal",
+      "filas": 2
+    },
+    "eucalipto_2": {
+      "id": "COND. EUCALIPTO 2",
+      "descripcion": "Condominio Eucalipto 2",
+      "casas": 32,
+      "coords": [
+        80,
+        665,
+        645,
+        851
+      ],
+      "orientacion": "Horizontal",
+      "filas": 2
+    },
+    "eucalipto_4": {
+      "id": "COND. EUCALIPTO 4",
+      "descripcion": "Condominio Eucalipto 4",
+      "casas": 22,
+      "coords": [
+        1011,
+        220,
+        1261,
+        634
+      ],
+      "orientacion": "Vertical",
+      "columnas": 2
+    },
+    "eucalipto_3_nuevo": {
+      "id": "COND. EUCALIPTO 3",
+      "descripcion": "Condominio Eucalipto 3",
+      "casas": 19,
+      "coords": [
+        1292,
+        53,
+        1452,
+        636
+      ],
+      "orientacion": "Vertical"
+    },
+    "eucalipto_6": {
+      "id": "COND. EUCALIPTO 6",
+      "descripcion": "Condominio Eucalipto 6",
+      "casas": 16,
+      "coords": [
+        273,
+        221,
+        653,
+        430
+      ],
+      "orientacion": "Horizontal",
+      "filas": 2
+    },
+    "eucalipto_7": {
+      "id": "COND. EUCALIPTO 7",
+      "descripcion": "Condominio Eucalipto 7",
+      "casas": 17,
+      "coords": [
+        80,
+        53,
+        241,
+        606
+      ],
+      "orientacion": "Vertical"
+    },
+    "eucalipto_5": {
+      "id": "COND. EUCALIPTO 5",
+      "descripcion": "Condominio Eucalipto 5",
+      "casas": 26,
+      "coords": [
+        274,
+        53,
+        1261,
+        190
+      ],
+      "orientacion": "Horizontal"
+    }
+  },
+  "calles": {
+    "calle_zapote": {
+      "id": "CALLE ZAPOTE",
+      "start": [
+        273,
+        203
+      ],
+      "end": [
+        1276,
+        203
+      ],
+      "width": 30
+    },
+    "calle_jabin": {
+      "id": "CALLE JABIN",
+      "start": [
+        80,
+        619
+      ],
+      "end": [
+        1451,
+        649
+      ],
+      "width": 30
+    },
+    "calle_chaca": {
+      "id": "CALLE CHACA",
+      "start": [
+        257,
+        53
+      ],
+      "end": [
+        257,
+        636
+      ],
+      "width": 30
+    },
+    "calle_eucalipto_vertical": {
+      "id": "CALLE EUCALIPTO",
+      "start": [
+        725,
+        649
+      ],
+      "end": [
+        725,
+        866
+      ],
+      "width": 30
+    },
+    "av_paseo": {
+      "id": "AV. PASEO",
+      "start": [
+        80,
+        866
+      ],
+      "end": [
+        1451,
+        866
+      ],
+      "width": 40
+    },
+    "calle_chacte": {
+      "id": "CALLE CHACTE",
+      "start": [
+        1276,
+        53
+      ],
+      "end": [
+        1276,
+        636
+      ],
+      "width": 30
+    },
+    "calle_cacao": {
+      "id": "CALLE CACAO",
+      "start": [
+        994,
+        215
+      ],
+      "end": [
+        994,
+        649
+      ],
+      "width": 30
+    },
+    "calle_caoba": {
+      "id": "CALLE CAOBA",
+      "start": [
+        273,
+        447
+      ],
+      "end": [
+        994,
+        447
+      ],
+      "width": 30
+    }
+  },
+  "houses": {
+    "E7-01": {
+      "id": "E7-01",
+      "condominio": "eucalipto_7",
+      "direccion": "Calle Chaca, Cond. Eucalipto 7, Casa 01",
+      "propietario": "Por asignar",
+      "tamano": "120m²",
+      "estado": "Disponible",
+      "historial_pagos": [],
+      "deuda_actual": 0
+    }
+  },
+  "layout": {},
+  "draw_condominio": {},
+  "draw_rectangle": {},
+  "draw_houses": {}
+}
