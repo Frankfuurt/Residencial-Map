@@ -285,21 +285,26 @@ class ResidencialMap:
                 house_width = (scaled_coords[2] - scaled_coords[0]) / (houses_per_row + 1)
                 total_height = scaled_coords[3] - scaled_coords[1]
                 house_height = total_height / 4
-                
+
                 for row in range(2):
                     y_offset = scaled_coords[1] + (total_height * (row + 1)) / 3
-                    
+
                     for i in range(houses_per_row):
                         x = scaled_coords[0] + ((i + 1) * house_width)
                         y = y_offset
-                        
-                        house_number = i + 1 + (row * houses_per_row)
+
+                        if row == 0:
+                            # Primera fila: orden normal
+                            house_number = i + 1
+                        else:
+                            # Segunda fila: orden invertido
+                            house_number = num_houses - i
                         house_id = f"{condo_id}-{house_number:02d}"
                         is_selected = (st.session_state.selected_condo == condo_id and 
                                     st.session_state.selected_house == house_id)
-                        
+
                         fill_color = 'yellow' if is_selected else '#F5F5F5'
-                        
+
                         draw.rectangle(
                             [
                                 (int(x - house_width/2), int(y - house_height/2)),
@@ -308,7 +313,7 @@ class ResidencialMap:
                             fill=fill_color,
                             outline='black'
                         )
-                        
+
                         draw.text((x, y), str(house_number), fill='black', font=self.font, anchor="mm")
             else:
                 house_width = (scaled_coords[2] - scaled_coords[0]) / (num_houses + 1)
@@ -341,21 +346,21 @@ class ResidencialMap:
                 total_width = scaled_coords[2] - scaled_coords[0]
                 house_width = total_width / 4
                 house_height = (scaled_coords[3] - scaled_coords[1]) / (houses_per_col + 1)
-                
                 for col in range(2):
                     x_offset = scaled_coords[0] + (total_width * (col + 1)) / 3
-                    
                     for i in range(houses_per_col):
                         x = x_offset
                         y = scaled_coords[1] + ((i + 1) * house_height)
-                        
-                        house_number = i + 1 + (col * houses_per_col)
+                        if col == 0:
+                            # Primera columna: descendente del 22 al 12
+                            house_number = num_houses - i
+                        else:
+                            # Segunda columna: ascendente del 1 al 11
+                            house_number = i + 1
                         house_id = f"{condo_id}-{house_number:02d}"
                         is_selected = (st.session_state.selected_condo == condo_id and 
                                     st.session_state.selected_house == house_id)
-                        
                         fill_color = 'yellow' if is_selected else '#F5F5F5'
-                        
                         draw.rectangle(
                             [
                                 (int(x - house_width/2), int(y - house_height/2)),
@@ -364,7 +369,6 @@ class ResidencialMap:
                             fill=fill_color,
                             outline='black'
                         )
-                        
                         draw.text((x, y), str(house_number), fill='black', font=self.font, anchor="mm")
             else:
                 house_width = (scaled_coords[2] - scaled_coords[0]) / 3
@@ -392,8 +396,12 @@ class ResidencialMap:
                     draw.text((x, y), str(i+1), fill='black', font=self.font, anchor="mm")
     
     def create_info_panel(self):
-        # Lista desplegable de condominios
-        condo_names = list(self.condominios.keys())
+        # Ordenar condominios por número ascendente extraído del nombre (eucalipto_1, eucalipto_2, ...)
+        def extract_number(condo_key):
+            import re
+            match = re.search(r'_(\d+)', condo_key)
+            return int(match.group(1)) if match else 0
+        condo_names = sorted(list(self.condominios.keys()), key=extract_number)
         selected_condo = st.selectbox(
             "Seleccionar Condominio",
             condo_names,
@@ -405,7 +413,7 @@ class ResidencialMap:
             st.session_state.selected_condo = selected_condo
             condo = self.condominios[selected_condo]
             
-            # Generar lista de casas en el condominio
+            # Generar lista de casas en orden numérico ascendente
             house_ids = [f"{selected_condo}-{i+1:02d}" for i in range(condo['casas'])]
             selected_house = st.selectbox(
                 "Seleccionar Casa",
