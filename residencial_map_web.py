@@ -124,7 +124,7 @@ class ResidencialMap:
             # Pasar los factores de escala al método de dibujo de casas
             self.draw_houses_in_condominio(draw, condo, condo_id, scale_x, scale_y)
 
-        # Dibujar calles al final (por encima de todo)
+        # Dibujar las líneas de las calles
         for calle_id, calle in self.calles.items():
             draw.line(
                 [
@@ -134,10 +134,81 @@ class ResidencialMap:
                 fill='gray',
                 width=int(calle.get('width', 30) * scale_x)
             )
-            # Agregar nombre de la calle con un offset vertical de -1 píxel
+
+        # Dibujar las etiquetas de las calles al final (por encima de todo)
+        for calle_id, calle in self.calles.items():
+            # Calcular posición del texto
             text_x = int((calle['start'][0] + calle['end'][0]) * scale_x / 2)
-            text_y = int((calle['start'][1] + calle['end'][1]) * scale_y / 2) - 1  # Reducido a -1
-            draw.text((text_x, text_y), calle['id'], fill='white', font=self.font, anchor="mm")
+            text_y = int((calle['start'][1] + calle['end'][1]) * scale_y / 2)
+
+            # Crear una imagen temporal para el texto que podamos rotar
+            if calle_id in ['calle_chaca', 'calle_cacao', 'calle_chacte', 'calle_eucalipto_vertical']:
+                # Para calles verticales
+                text_width = 250
+                text_height = 50
+                text_img = Image.new('RGBA', (text_width, text_height), (0, 0, 0, 0))
+                text_draw = ImageDraw.Draw(text_img)
+                
+                # Dibujar el texto centrado en la imagen temporal
+                text_draw.text(
+                    (text_width//2, text_height//2),
+                    calle['id'],
+                    fill='white',
+                    font=self.font,
+                    anchor="mm"
+                )
+                
+                # Rotar -90 grados (sentido horario)
+                text_img = text_img.rotate(-90, expand=True, fillcolor=(0,0,0,0))
+                
+                # Calcular punto medio vertical del segmento de calle
+                start_y = int(calle['start'][1] * scale_y)
+                end_y = int(calle['end'][1] * scale_y)
+                mid_y = (start_y + end_y) // 2
+                
+                # Ajustar posiciones específicas para cada calle vertical
+                if calle_id == 'calle_chaca':
+                    x_offset = -text_height//2
+                    y_offset = -text_width//2
+                elif calle_id == 'calle_cacao':
+                    x_offset = -text_height//2
+                    y_offset = -text_width//2
+                elif calle_id == 'calle_eucalipto_vertical':
+                    x_offset = -text_height//2
+                    y_offset = -text_width//2 - 30  # Ajustado para mejor visibilidad en la parte inferior del mapa
+                else:  # calle_chacte
+                    x_offset = -text_height//2
+                    y_offset = -text_width//2
+                
+                # Calcular posición final
+                text_pos = (
+                    int(text_x + x_offset), 
+                    int(mid_y + y_offset)
+                )
+                
+                # Pegar la imagen rotada usando máscara alfa
+                img.paste(text_img, text_pos, text_img)
+            else:
+                # Para calles horizontales
+                # Calcular punto medio horizontal del segmento de calle
+                mid_x = (int(calle['start'][0] * scale_x) + int(calle['end'][0] * scale_x)) // 2
+                
+                # Ajustes específicos por calle
+                y_offsets = {
+                    'calle_zapote': -2,
+                    'calle_jabin': -2,
+                    'calle_caoba': -2,
+                    'av_paseo': -2,
+                }
+                y_offset = y_offsets.get(calle_id, 0)
+                
+                draw.text(
+                    (mid_x, text_y + y_offset),
+                    calle['id'],
+                    fill='white',
+                    font=self.font,
+                    anchor="mm"
+                )
         
         # Convertir la imagen a base64
         img_bytes = io.BytesIO()
@@ -148,7 +219,7 @@ class ResidencialMap:
         html = f"""
         <div style="position: relative; width: {self.map_width}px; height: {self.map_height}px;">
             <img src="data:image/png;base64,{img_b64}" style="width: 100%; height: 100%;" />
-            <div id="hover-label" style="position: absolute; display: none; background: rgba(0,0,0,0.7); color: white; padding: 5px; border-radius: 3px;"></div>
+            <div id="hover-label" style="position: absolute; display: none; background: rgba(0,0,0,0.7); color: white; padding: 5px; border-radius: 3px; pointer-events: none;"></div>
         </div>
         <script>
             const hoverMap = {json.dumps(hover_map)};
@@ -169,8 +240,8 @@ class ResidencialMap:
                 let found = false;
                 for (const [id, data] of Object.entries(hoverMap)) {{
                     const coords = data.coords;
-                    if (mapX >= coords[0] && mapX <= coords[2] and 
-                        mapY >= coords[1] and mapY <= coords[3]) {{
+                    if (mapX >= coords[0] && mapX <= coords[2] && 
+                        mapY >= coords[1] && mapY <= coords[3]) {{
                         label.textContent = data.descripcion;
                         label.style.display = 'block';
                         label.style.left = `${{e.clientX - rect.left + 10}}px`;
@@ -214,21 +285,26 @@ class ResidencialMap:
                 house_width = (scaled_coords[2] - scaled_coords[0]) / (houses_per_row + 1)
                 total_height = scaled_coords[3] - scaled_coords[1]
                 house_height = total_height / 4
-                
+
                 for row in range(2):
                     y_offset = scaled_coords[1] + (total_height * (row + 1)) / 3
-                    
+
                     for i in range(houses_per_row):
                         x = scaled_coords[0] + ((i + 1) * house_width)
                         y = y_offset
-                        
-                        house_number = i + 1 + (row * houses_per_row)
+
+                        if row == 0:
+                            # Primera fila: orden normal
+                            house_number = i + 1
+                        else:
+                            # Segunda fila: orden invertido
+                            house_number = num_houses - i
                         house_id = f"{condo_id}-{house_number:02d}"
                         is_selected = (st.session_state.selected_condo == condo_id and 
                                     st.session_state.selected_house == house_id)
-                        
+
                         fill_color = 'yellow' if is_selected else '#F5F5F5'
-                        
+
                         draw.rectangle(
                             [
                                 (int(x - house_width/2), int(y - house_height/2)),
@@ -237,7 +313,7 @@ class ResidencialMap:
                             fill=fill_color,
                             outline='black'
                         )
-                        
+
                         draw.text((x, y), str(house_number), fill='black', font=self.font, anchor="mm")
             else:
                 house_width = (scaled_coords[2] - scaled_coords[0]) / (num_houses + 1)
@@ -270,21 +346,21 @@ class ResidencialMap:
                 total_width = scaled_coords[2] - scaled_coords[0]
                 house_width = total_width / 4
                 house_height = (scaled_coords[3] - scaled_coords[1]) / (houses_per_col + 1)
-                
                 for col in range(2):
                     x_offset = scaled_coords[0] + (total_width * (col + 1)) / 3
-                    
                     for i in range(houses_per_col):
                         x = x_offset
                         y = scaled_coords[1] + ((i + 1) * house_height)
-                        
-                        house_number = i + 1 + (col * houses_per_col)
+                        if col == 0:
+                            # Primera columna: descendente del 22 al 12
+                            house_number = num_houses - i
+                        else:
+                            # Segunda columna: ascendente del 1 al 11
+                            house_number = i + 1
                         house_id = f"{condo_id}-{house_number:02d}"
                         is_selected = (st.session_state.selected_condo == condo_id and 
                                     st.session_state.selected_house == house_id)
-                        
                         fill_color = 'yellow' if is_selected else '#F5F5F5'
-                        
                         draw.rectangle(
                             [
                                 (int(x - house_width/2), int(y - house_height/2)),
@@ -293,7 +369,6 @@ class ResidencialMap:
                             fill=fill_color,
                             outline='black'
                         )
-                        
                         draw.text((x, y), str(house_number), fill='black', font=self.font, anchor="mm")
             else:
                 house_width = (scaled_coords[2] - scaled_coords[0]) / 3
@@ -321,8 +396,12 @@ class ResidencialMap:
                     draw.text((x, y), str(i+1), fill='black', font=self.font, anchor="mm")
     
     def create_info_panel(self):
-        # Lista desplegable de condominios
-        condo_names = list(self.condominios.keys())
+        # Ordenar condominios por número ascendente extraído del nombre (eucalipto_1, eucalipto_2, ...)
+        def extract_number(condo_key):
+            import re
+            match = re.search(r'_(\d+)', condo_key)
+            return int(match.group(1)) if match else 0
+        condo_names = sorted(list(self.condominios.keys()), key=extract_number)
         selected_condo = st.selectbox(
             "Seleccionar Condominio",
             condo_names,
@@ -334,7 +413,7 @@ class ResidencialMap:
             st.session_state.selected_condo = selected_condo
             condo = self.condominios[selected_condo]
             
-            # Generar lista de casas en el condominio
+            # Generar lista de casas en orden numérico ascendente
             house_ids = [f"{selected_condo}-{i+1:02d}" for i in range(condo['casas'])]
             selected_house = st.selectbox(
                 "Seleccionar Casa",
